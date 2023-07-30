@@ -112,5 +112,10 @@ public class PlayerController : MonoBehaviour
         {
             _planeNormalVector = collision.contacts[0].normal;
         }
+        if (collision.gameObject.tag == "Hurdle")
+        {
+            RbAddPower();
+            Debug.Log("atatta");
+        }
     }
 }
