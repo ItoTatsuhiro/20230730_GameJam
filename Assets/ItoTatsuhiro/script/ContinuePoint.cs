@@ -37,6 +37,7 @@ public class ContinuePoint : MonoBehaviour
                         _ps.continuePonitCount_++;
                         _ps.continuePoint_[_ps.continuePonitCount_].transform.position = other.transform.position;
                         Debug.Log("íÜä‘ínì_í«â¡ÅI");
+                        return;
                     }
                 }
             }
