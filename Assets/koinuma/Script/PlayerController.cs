@@ -10,20 +10,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _jumpPower = 10;
     /// <summary>空中での方向転換のスピード</summary>
     [SerializeField] float _turnSpeed = 3;
-    [SerializeField] PlaneNormalOutputer _planeNormal;
     Rigidbody _rb;
     Animator _anim;
-    /// <summary>接地判定の距離</summary>
-    //float _isGroundedLength = 1.1f;
     bool _jumped;
     float _jumpedTimer;
-    bool IsGround;
+    bool _isGround;
+    Vector3 _planeNormalVector;
 
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponent<Animator>();
-        //_isGroundedLength = GetComponent<CapsuleCollider>().height / 2 + 0.1f;
     }
 
     void Update()
@@ -35,7 +32,7 @@ public class PlayerController : MonoBehaviour
             {
                 _jumped = false;
             }
-            IsGround = false;
+            _isGround = false;
         }
 
         // 水平移動処理
@@ -47,7 +44,7 @@ public class PlayerController : MonoBehaviour
         dir = dir.normalized; // 単位化してある水平方向の入力ベクトル
         Vector3 velo = dir * _moveSpeed;
         velo.y = _rb.velocity.y;
-        if (!IsGround)
+        if (!_isGround)
         {
             // 空中でゆっくり方向転換が可能
             velo = _rb.velocity;
@@ -69,19 +66,15 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //if (dir.magnitude == 0f)
-            //{
-            //    velo.y = -10;
-            //}
-            
+            Vector3 onPlaneVelo = Vector3.ProjectOnPlane(velo, _planeNormalVector);
             if (Input.GetButton("Jump"))
             {
                 RbAddPower();
-                velo.y = _jumpPower;
+                onPlaneVelo.y = _jumpPower;
+                _anim.SetTrigger("Jump");
             }
 
-            //Vector3 onPlaneVelo = Vector3.ProjectOnPlane(velo, _planeNormal.PlaneNormalVector());
-            _rb.velocity = velo; // 接地中はvelocityを書き換える
+            _rb.velocity = onPlaneVelo; // 接地中はvelocityを書き換える
         }
 
         // 進行方向を向く
@@ -93,7 +86,7 @@ public class PlayerController : MonoBehaviour
 
         // アニメーターの設定
         _anim.SetFloat("Speed", dir.magnitude);
-        _anim.SetBool("Jump", !IsGround);
+        _anim.SetBool("IsGround", _isGround);
     }
 
     /// <summary>ジャンプなどをしたとき一定時間接地判定にさせないためのメソッド</summary>
@@ -105,10 +98,19 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        IsGround = true;
+        _isGround = true;
     }
     private void OnTriggerExit(Collider other)
     {
-        IsGround = false;
+        _isGround = false;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        float angle = Vector3.Angle(Vector3.up, collision.contacts[0].normal);
+        if (angle < 45)
+        {
+            _planeNormalVector = collision.contacts[0].normal;
+        }
     }
 }
