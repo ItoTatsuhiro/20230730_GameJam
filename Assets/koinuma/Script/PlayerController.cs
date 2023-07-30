@@ -1,8 +1,4 @@
 using UnityEngine;
-using Cinemachine;
-using System.Collections.Generic;
-using UnityEngine.UIElements;
-using Cinemachine.Utility;
 
 /// <summary>
 /// プレイヤーを動かすコンポーネント
